@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@SuppressWarnings("null")
 public class CategoriaService {
     private final CategoriaRepository categoriaRepository;
 
@@ -15,9 +16,17 @@ public class CategoriaService {
         this.categoriaRepository = categoriaRepository;
     }
 
-    public List<Categoria> obtenerTodasLasCategorias() { return categoriaRepository.findAll(); }
-    public Optional<Categoria> buscarPorId(Long id) { return categoriaRepository.findById(id); }
-    public List<Categoria> buscarPorNombre(String texto) { return categoriaRepository.buscarPorNombre(texto); }
+    public List<Categoria> obtenerTodasLasCategorias() { 
+        return categoriaRepository.findAll(); 
+    }
+
+    public Optional<Categoria> buscarPorId(Long id) { 
+        return categoriaRepository.findById(id);
+    }
+
+    public List<Categoria> buscarPorNombre(String texto) { 
+        return categoriaRepository.buscarPorNombre(texto); 
+    }
 
     public Categoria crearCategoria(Categoria categoria) {
         if (categoria == null || categoria.getNombre() == null || categoria.getNombre().isBlank()) {

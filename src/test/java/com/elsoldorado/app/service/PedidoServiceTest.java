@@ -20,6 +20,7 @@ import com.elsoldorado.app.model.Pedido;
 import com.elsoldorado.app.model.Plato;
 import com.elsoldorado.app.repository.PedidoRepository;
 
+@SuppressWarnings("null")
 public class PedidoServiceTest {
 
     private PedidoService pedidoService;
