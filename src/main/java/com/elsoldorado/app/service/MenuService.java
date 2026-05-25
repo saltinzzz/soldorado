@@ -1,68 +1,32 @@
 package com.elsoldorado.app.service;
 
-import com.elsoldorado.app.model.Categoria;
 import com.elsoldorado.app.model.Plato;
+import com.elsoldorado.app.repository.PlatoRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class MenuService {
 
-    private final List<Plato> platos = new ArrayList<>();
+    private final PlatoRepository platoRepository;
 
-    public MenuService(CategoriaService categoriaService) {
-        Categoria entradas = categoriaService.buscarPorId(1L).orElseThrow();
-        Categoria fondos = categoriaService.buscarPorId(2L).orElseThrow();
-        Categoria bebidas = categoriaService.buscarPorId(3L).orElseThrow();
-        Categoria postres = categoriaService.buscarPorId(4L).orElseThrow();
-
-        platos.add(new Plato(1L, "Ceviche", "Pescado fresco con limón y ají", 32.00, entradas, true, true, true));
-        platos.add(new Plato(2L, "Papa a la Huancaína", "Papa con crema de ají amarillo", 18.00, entradas, true, true, true));
-        platos.add(new Plato(3L, "Lomo Saltado", "Carne salteada con papas fritas y arroz", 28.00, fondos, true, true, true));
-        platos.add(new Plato(4L, "Ají de Gallina", "Pollo deshilachado en crema", 24.00, fondos, true, false, true));
-        platos.add(new Plato(5L, "Chicha Morada", "Bebida tradicional peruana", 8.00, bebidas, true, true, true));
-        platos.add(new Plato(6L, "Suspiro a la Limeña", "Postre tradicional peruano", 14.00, postres, true, false, false));
+    public MenuService(PlatoRepository platoRepository) {
+        this.platoRepository = platoRepository;
     }
 
-    public List<Plato> obtenerMenuCompleto() {
-        return platos.stream()
-                .filter(Plato::isDisponible)
-                .collect(Collectors.toList());
-    }
-
-    public List<Plato> obtenerVistaPredefinida() {
-        return platos.stream()
-                .filter(Plato::isDisponible)
-                .filter(Plato::isVisibleEnInicio)
-                .collect(Collectors.toList());
-    }
-
-    public List<Plato> obtenerPlatosDestacados() {
-        return platos.stream()
-                .filter(Plato::isDisponible)
-                .filter(Plato::isDestacado)
-                .collect(Collectors.toList());
-    }
-
-    public List<Plato> obtenerPorCategoria(String categoria) {
-        return platos.stream()
-                .filter(Plato::isDisponible)
-                .filter(p -> p.getCategoria().getNombre().equalsIgnoreCase(categoria))
-                .collect(Collectors.toList());
-    }
-
-    public Optional<Plato> buscarPorId(Long id) {
-        return platos.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst();
-    }
+    public List<Plato> obtenerMenuCompleto() { return platoRepository.findByDisponibleTrue(); }
+    public List<Plato> obtenerVistaPredefinida() { return platoRepository.findByDisponibleTrueAndVisibleEnInicioTrue(); }
+    public List<Plato> obtenerPlatosDestacados() { return platoRepository.findByDisponibleTrueAndDestacadoTrue(); }
+    public List<Plato> obtenerPorCategoria(String categoria) { return platoRepository.findByDisponibleTrueAndCategoriaNombreIgnoreCase(categoria); }
+    public List<Plato> buscarPorTexto(String texto) { return platoRepository.buscarPorNombreOCategoria(texto); }
+    public List<Plato> buscarPorRangoPrecio(BigDecimal min, BigDecimal max) { return platoRepository.buscarPorRangoPrecio(min, max); }
+    public Optional<Plato> buscarPorId(Long id) { return platoRepository.findById(id); }
 
     public Plato actualizarPlato(Long id, Plato actualizado) {
-        Plato existente = buscarPorId(id)
+        Plato existente = platoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Plato no encontrado"));
         existente.setNombre(actualizado.getNombre());
         existente.setDescripcion(actualizado.getDescripcion());
@@ -71,33 +35,29 @@ public class MenuService {
         existente.setDisponible(actualizado.isDisponible());
         existente.setDestacado(actualizado.isDestacado());
         existente.setVisibleEnInicio(actualizado.isVisibleEnInicio());
-        return existente;
+        return platoRepository.save(existente);
     }
 
     public void eliminarPlato(Long id) {
-        Plato plato = buscarPorId(id)
+        Plato plato = platoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Plato no encontrado"));
-        platos.remove(plato);
+        platoRepository.delete(plato);
     }
 
     public Plato cambiarDisponibilidad(Long id, boolean disponible) {
-        Plato plato = buscarPorId(id)
+        Plato plato = platoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Plato no encontrado"));
         plato.setDisponible(disponible);
-        return plato;
+        return platoRepository.save(plato);
     }
 
     public Plato agregarPlato(Plato plato) {
         if (plato.getNombre() == null || plato.getNombre().isBlank())
             throw new RuntimeException("El nombre del plato es obligatorio");
-        if (plato.getPrecio() <= 0)
+        if (plato.getPrecio() == null || plato.getPrecio().compareTo(BigDecimal.ZERO) <= 0)
             throw new RuntimeException("El precio debe ser mayor que cero");
         if (plato.getCategoria() == null)
             throw new RuntimeException("La categoría es obligatoria");
-        long maxId = platos.stream().mapToLong(Plato::getId).max().orElse(0L);
-        plato.setId(maxId + 1);
-        platos.add(plato);
-        return plato;
+        return platoRepository.save(plato);
     }
 }
-

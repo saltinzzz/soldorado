@@ -1,5 +1,8 @@
 package com.elsoldorado.app.service;
 import com.elsoldorado.app.model.Plato;
+
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,7 +16,7 @@ public class PlatoService {
     public Plato crearPlato(Plato plato) {
         if (plato.getNombre() == null || plato.getNombre().isBlank())
             throw new RuntimeException("El nombre del plato es obligatorio");
-        if (plato.getPrecio() <= 0)
+        if (plato.getPrecio() == null || plato.getPrecio().compareTo(BigDecimal.ZERO) <= 0)
             throw new RuntimeException("El precio debe ser mayor que cero");
         if (plato.getCategoria() == null)
             throw new RuntimeException("La categoría es obligatoria");

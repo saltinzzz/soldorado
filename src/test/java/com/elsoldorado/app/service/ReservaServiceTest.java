@@ -8,18 +8,24 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import com.elsoldorado.app.model.EstadoReserva;
 import com.elsoldorado.app.model.Reserva;
+import com.elsoldorado.app.repository.ReservaRepository;
 
 public class ReservaServiceTest {
 
     private ReservaService reservaService;
 
+    @Mock
+    private ReservaRepository reservaRepository;
+
     @BeforeEach
     public void setUp() {
-        // Inicializamos el servicio. El constructor cargará las 5 reservas de ejemplo.
-        reservaService = new ReservaService();
+        MockitoAnnotations.openMocks(this);
+        reservaService = new ReservaService(reservaRepository);
     }
 
     @Test

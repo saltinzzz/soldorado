@@ -1,6 +1,7 @@
 package com.elsoldorado.app.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,15 +10,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.elsoldorado.app.model.Categoria;
+import com.elsoldorado.app.repository.CategoriaRepository;
 
 public class CategoriaServiceTest {
 
+    private CategoriaRepository categoriaRepository;
     private CategoriaService categoriaService;
 
     @BeforeEach
     public void setUp() {
         // Reiniciamos el servicio antes de cada test para tener los datos originales
-        categoriaService = new CategoriaService();
+        categoriaRepository = mock(CategoriaRepository.class);
+        categoriaService = new CategoriaService(categoriaRepository);
     }
 
     @Test

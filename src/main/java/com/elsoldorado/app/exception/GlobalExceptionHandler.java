@@ -1,51 +1,46 @@
 package com.elsoldorado.app.exception;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.LinkedHashMap;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 404 - No encontrado
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, Object> handleNotFound(RuntimeException e) {
-        return buildError(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-
-    // 400 - Datos inválidos
     @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleBadRequest(IllegalArgumentException e) {
-        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    // Errores de ResponseStatusException (los que ya usas en controllers)
     @ExceptionHandler(ResponseStatusException.class)
-    public Map<String, Object> handleResponseStatus(ResponseStatusException e) {
-        return buildError(HttpStatus.valueOf(e.getStatusCode().value()), e.getReason());
+    public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException ex) {
+        return build(HttpStatus.valueOf(ex.getStatusCode().value()), ex.getReason());
     }
 
-    // 500 - Error inesperado
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
+        HttpStatus status = ex.getMessage() != null && ex.getMessage().toLowerCase().contains("no encontrado")
+                ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+        return build(status, ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, Object> handleGeneric(Exception e) {
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
-    private Map<String, Object> buildError(HttpStatus status, String mensaje) {
-        Map<String, Object> error = new LinkedHashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", status.value());
-        error.put("error", status.getReasonPhrase());
-        error.put("mensaje", mensaje);
-        return error;
+    private ResponseEntity<Map<String, Object>> build(HttpStatus status, String message) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+        return ResponseEntity.status(status).body(body);
     }
 }

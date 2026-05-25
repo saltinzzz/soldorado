@@ -1,19 +1,12 @@
 package com.elsoldorado.app.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.elsoldorado.app.model.EstadoReserva;
@@ -26,23 +19,25 @@ public class ReservaController {
 
     private final ReservaService reservaService;
 
-    public ReservaController(ReservaService reservaService) {
-        this.reservaService = reservaService;
-    }
+    public ReservaController(ReservaService reservaService) { this.reservaService = reservaService; }
 
     @GetMapping
-    public List<Reserva> listarReservas() {
-        return reservaService.listarReservas();
-    }
+    public List<Reserva> listarReservas() { return reservaService.listarReservas(); }
 
     @GetMapping("/{id}")
     public Reserva obtenerReservaPorId(@PathVariable Long id) {
         Reserva reserva = reservaService.buscarPorId(id);
-        if (reserva == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada");
-        }
+        if (reserva == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada");
         return reserva;
     }
+
+    @GetMapping("/proximas")
+    public List<Reserva> buscarProximas(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde) {
+        return reservaService.buscarProximas(desde);
+    }
+
+    @GetMapping("/buscar")
+    public List<Reserva> buscarPorCliente(@RequestParam String cliente) { return reservaService.buscarPorCliente(cliente); }
 
     @PatchMapping("/{id}/estado")
     public Reserva cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> body) {
@@ -52,17 +47,12 @@ public class ReservaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Reserva registrarReserva(@RequestBody Reserva reserva) {
-        return reservaService.registrarReserva(reserva);
-    }
+    public Reserva registrarReserva(@RequestBody Reserva reserva) { return reservaService.registrarReserva(reserva); }
 
     @PutMapping("/{id}")
-    public Reserva actualizarReserva(@PathVariable Long id, @RequestBody Reserva reserva) {
-        return reservaService.actualizarReserva(id, reserva);
-    }
+    public Reserva actualizarReserva(@PathVariable Long id, @RequestBody Reserva reserva) { return reservaService.actualizarReserva(id, reserva); }
 
     @DeleteMapping("/{id}")
-    public void eliminarReserva(@PathVariable Long id) {
-        reservaService.eliminarReserva(id);
-    }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminarReserva(@PathVariable Long id) { reservaService.eliminarReserva(id); }
 }

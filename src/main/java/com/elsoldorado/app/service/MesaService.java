@@ -1,59 +1,40 @@
 package com.elsoldorado.app.service;
+
 import com.elsoldorado.app.model.Mesa;
+import com.elsoldorado.app.repository.MesaRepository;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class MesaService {
-    private final List<Mesa> mesas = new ArrayList<>();
-    private Long secuencia = 1L;
+    private final MesaRepository mesaRepository;
 
-    public MesaService() {
-        mesas.add(new Mesa(1L, 1, 2, true));
-        mesas.add(new Mesa(2L, 2, 4, true));
-        mesas.add(new Mesa(3L, 3, 6, false));
-        mesas.add(new Mesa(4L, 4, 4, true));
-        secuencia = 5L;
+    public MesaService(MesaRepository mesaRepository) {
+        this.mesaRepository = mesaRepository;
     }
 
-    public List<Mesa> listarMesas() { 
-        return mesas; 
-    }
-
-    public List<Mesa> listarDisponibles() {
-        return mesas.stream()
-                .filter(Mesa::isDisponible)
-                .collect(Collectors.toList());
-    }
-
-    public Optional<Mesa> buscarPorId(Long id) {
-        return mesas.stream()
-                .filter(m -> m.getId().equals(id))
-                .findFirst();
-    }
+    public List<Mesa> listarMesas() { return mesaRepository.findAll(); }
+    public List<Mesa> listarDisponibles() { return mesaRepository.findByDisponibleTrue(); }
+    public List<Mesa> buscarDisponiblesPorCapacidad(int capacidad) { return mesaRepository.buscarDisponiblesPorCapacidad(capacidad); }
+    public Optional<Mesa> buscarPorId(Long id) { return mesaRepository.findById(id); }
 
     public Mesa crearMesa(Mesa mesa) {
-        if (mesa.getCapacidad() <= 0)
-            throw new RuntimeException("La capacidad debe ser mayor que cero");
-        mesa.setId(secuencia++);
-        mesa.setDisponible(true);
-        mesas.add(mesa);
-        return mesa;
+        if (mesa.getCapacidad() <= 0) throw new RuntimeException("La capacidad debe ser mayor que cero");
+        if (mesaRepository.existsByNumero(mesa.getNumero())) throw new RuntimeException("Ya existe una mesa con ese número");
+        if (!mesa.isDisponible()) mesa.setDisponible(true);
+        return mesaRepository.save(mesa);
     }
 
     public Mesa cambiarDisponibilidad(Long id, boolean disponible) {
-        Mesa mesa = buscarPorId(id)
-                .orElseThrow(() -> new RuntimeException("Mesa no encontrada"));
+        Mesa mesa = mesaRepository.findById(id).orElseThrow(() -> new RuntimeException("Mesa no encontrada"));
         mesa.setDisponible(disponible);
-        return mesa;
+        return mesaRepository.save(mesa);
     }
 
     public void eliminarMesa(Long id) {
-        Mesa mesa = buscarPorId(id)
-                .orElseThrow(() -> new RuntimeException("Mesa no encontrada"));
-        mesas.remove(mesa);
+        Mesa mesa = mesaRepository.findById(id).orElseThrow(() -> new RuntimeException("Mesa no encontrada"));
+        mesaRepository.delete(mesa);
     }
 }

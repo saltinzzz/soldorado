@@ -1,7 +1,6 @@
 package com.elsoldorado.app.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,29 +10,24 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.elsoldorado.app.model.Categoria;
 import com.elsoldorado.app.model.Plato;
+import com.elsoldorado.app.repository.PlatoRepository;
 
 public class MenuServiceTest {
 
     private MenuService menuService;
 
     @Mock
-    private CategoriaService categoriaService;
+    private PlatoRepository platoRepository;
 
     @BeforeEach
     public void setUp() {
         // Inicializa los objetos anotados con @Mock
         MockitoAnnotations.openMocks(this);
-
-        // Configuramos el comportamiento del mock para que el constructor de MenuService no falle
-        when(categoriaService.buscarPorId(1L)).thenReturn(Optional.of(new Categoria(1L, "Entradas")));
-        when(categoriaService.buscarPorId(2L)).thenReturn(Optional.of(new Categoria(2L, "Platos de Fondo")));
-        when(categoriaService.buscarPorId(3L)).thenReturn(Optional.of(new Categoria(3L, "Bebidas")));
-        when(categoriaService.buscarPorId(4L)).thenReturn(Optional.of(new Categoria(4L, "Postres")));
+        menuService = new MenuService(platoRepository);
 
         // Creamos la instancia del servicio inyectando el mock
-        menuService = new MenuService(categoriaService);
+        menuService = new MenuService(platoRepository);
     }
 
     @Test

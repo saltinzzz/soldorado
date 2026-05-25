@@ -1,5 +1,6 @@
 package com.elsoldorado.app.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,8 @@ public class Pedido {
     @JoinColumn(name = "pedido_id")
     private List<DetallePedido> detalles = new ArrayList<>();
 
-    private double total;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal total;
 
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
@@ -38,12 +40,10 @@ public class Pedido {
     @Column(nullable = false, length = 20)
     private EstadoPedido estado;
 
-    public Pedido() {
-        
-    }
+    public Pedido() {}
 
     public Pedido(Long id, String nombreCliente, String telefono, String direccion, String referencia,
-                  List<DetallePedido> detalles, double total, LocalDateTime fechaHora, EstadoPedido estado) {
+                  List<DetallePedido> detalles, BigDecimal total, LocalDateTime fechaHora, EstadoPedido estado) {
         this.id = id;
         this.nombreCliente = nombreCliente;
         this.telefono = telefono;
@@ -55,81 +55,28 @@ public class Pedido {
         this.estado = estado;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getNombreCliente() {
-        return nombreCliente;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public String getDireccion() {
-        return direccion;
-    }
-
-    public String getReferencia() {
-        return referencia;
-    }
-
-    public List<DetallePedido> getDetalles() {
-        return detalles;
-    }
-
-    public double getTotal() {
-        return total;
-    }
-
-    public LocalDateTime getFechaHora() {
-        return fechaHora;
-    }
-
-    public EstadoPedido getEstado() {
-        return estado;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setNombreCliente(String nombreCliente) {
-        this.nombreCliente = nombreCliente;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
-
-    public void setReferencia(String referencia) {
-        this.referencia = referencia;
-    }
-
-    public void setDetalles(List<DetallePedido> detalles) {
-        this.detalles = detalles;
-    }
-
-    public void setTotal(double total) {
-        this.total = total;
-    }
+    public Long getId() { return id; }
+    public String getNombreCliente() { return nombreCliente; }
+    public String getTelefono() { return telefono; }
+    public String getDireccion() { return direccion; }
+    public String getReferencia() { return referencia; }
+    public List<DetallePedido> getDetalles() { return detalles; }
+    public BigDecimal getTotal() { return total; }
+    public LocalDateTime getFechaHora() { return fechaHora; }
+    public EstadoPedido getEstado() { return estado; }
+    public void setId(Long id) { this.id = id; }
+    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public void setDireccion(String direccion) { this.direccion = direccion; }
+    public void setReferencia(String referencia) { this.referencia = referencia; }
+    public void setDetalles(List<DetallePedido> detalles) { this.detalles = detalles; }
+    public void setTotal(BigDecimal total) { this.total = total; }
+    public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
+    public void setEstado(EstadoPedido estado) { this.estado = estado; }
 
     public void calcularTotal() {
         this.total = detalles.stream()
-        .mapToDouble(DetallePedido::getSubtotal)
-        .sum();
-    }
-
-    public void setFechaHora(LocalDateTime fechaHora) {
-        this.fechaHora = fechaHora;
-    }
-
-    public void setEstado(EstadoPedido estado) {
-        this.estado = estado;
+            .map(DetallePedido::getSubtotal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
