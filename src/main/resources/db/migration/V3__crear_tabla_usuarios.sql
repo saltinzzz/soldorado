@@ -1,0 +1,7 @@
+CREATE TABLE usuario (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(80) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    rol VARCHAR(20) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE
+);
