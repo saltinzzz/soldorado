@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Service
+@SuppressWarnings("null")
 public class ReservaService {
     private final ReservaRepository reservaRepository;
     private final MesaRepository mesaRepository;

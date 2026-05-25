@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@SuppressWarnings("null")
 public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final MenuService menuService;

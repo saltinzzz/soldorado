@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@SuppressWarnings("null")
 public class CategoriaService {
     private final CategoriaRepository categoriaRepository;
 
